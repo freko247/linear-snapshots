@@ -20,13 +20,11 @@ inputs:
 outputs:
   statistics-file:
     description: 'Path to the generated statistics file'
-    value: ${{ steps.generate-statistics.outputs.statistics-file }}
+    value: ${{ steps.generate-stats.outputs.statistics-file }}
 
 runs:
   using: 'node20'
   main: 'dist/index.js'
-  pre: 'dist/pre.js'
-  post: 'dist/post.js'
 
 branding:
   icon: 'activity'
