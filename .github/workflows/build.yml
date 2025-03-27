@@ -45,14 +45,15 @@ jobs:
           
       - name: Create Release
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Create a zip file containing the action files
           zip -r action.zip dist/index.js action.yml
           
-          # Create the release using GitHub CLI
-          gh release create "v${{ github.run_number }}" \
+          # Create the release using GitHub CLI and capture the upload URL
+          RELEASE_URL=$(gh release create "v${{ github.run_number }}" \
             --title "Release v${{ github.run_number }}" \
             --notes "Changes in this Release:
             ${{ github.event.head_commit.message }}
@@ -68,7 +69,11 @@ jobs:
             \`\`\`" \
             --draft=false \
             --prerelease=false \
-            action.zip
+            action.zip \
+            --json uploadUrl)
+          
+          # Extract the upload URL from the JSON response
+          echo "upload_url=${RELEASE_URL}" >> $GITHUB_OUTPUT
 
       - name: Publish to GitHub Marketplace
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -76,7 +81,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./action.zip
           asset_name: linear-statistics-action.zip
           asset_content_type: application/zip 
