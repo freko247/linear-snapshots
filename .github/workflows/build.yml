@@ -47,7 +47,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         id: create_release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Create a zip file containing the action files
           zip -r action.zip dist/index.js action.yml
@@ -74,6 +74,8 @@ jobs:
       - name: Get Release Upload URL
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         id: get_upload_url
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Get the release details and extract the upload URL
           RELEASE_URL=$(gh release view "v${{ github.run_number }}" --json uploadUrl)
