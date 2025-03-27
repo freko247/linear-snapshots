@@ -32,8 +32,8 @@ jobs:
             echo "Build failed: dist/index.js not found"
             exit 1
           fi
-          if [ ! -f "dist/pre.js" ]; then
-            echo "Build failed: dist/pre.js not found"
+          if [ ! -f "action.yml" ]; then
+            echo "Build failed: action.yml not found"
             exit 1
           fi
           
@@ -43,13 +43,22 @@ jobs:
         with:
           files: |
             dist/index.js
-            dist/pre.js
             action.yml
           tag_name: v${{ github.run_number }}
           name: Release v${{ github.run_number }}
           body: |
             Changes in this Release:
             ${{ github.event.head_commit.message }}
+            
+            ## Usage
+            ```yaml
+            - uses: freko247/linear-statistics-action@v${{ github.run_number }}
+              with:
+                linear-api-key: ${{ secrets.LINEAR_API_KEY }}
+                linear-team-id: ${{ secrets.LINEAR_TEAM_ID }}
+                output-path: 'linear-statistics/issue-statistics-${{ github.run_started_at | date: 'YYYY-MM-DD-HH-mm' }}.json'
+                schedule: '0 0 * * *'
+            ```
           draft: false
           prerelease: false
         env:
