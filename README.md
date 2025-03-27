@@ -2,6 +2,15 @@
 
 This GitHub Action generates and stores Linear issue statistics in your repository. It fetches all issues for a specified team and creates a JSON file with statistics about their status.
 
+## Features
+
+- Fetches all issues for a specified Linear team
+- Counts issues by status (Todo, In Progress, Backlog, Waiting, Other)
+- Generates timestamped JSON files with statistics
+- Supports pagination for large teams
+- Configurable output path and schedule
+- Automatic commits of generated statistics
+
 ## Usage
 
 Add the following to your repository's workflow file (e.g., `.github/workflows/linear-statistics.yml`):
@@ -12,6 +21,7 @@ name: Linear Issue Statistics
 on:
   schedule:
     - cron: '0 0 * * *'  # Run daily at midnight UTC
+  workflow_dispatch:  # Allow manual triggering
 
 jobs:
   generate-statistics:
@@ -25,12 +35,12 @@ jobs:
       
       - name: Generate Linear Statistics
         id: generate-stats
-        uses: your-username/linear-statistics-action@v1
+        uses: freko247/linear-statistics-action@v1
         with:
           linear-api-key: ${{ secrets.LINEAR_API_KEY }}
           linear-team-id: ${{ secrets.LINEAR_TEAM_ID }}
-          output-path: 'linear-statistics/issue-statistics-${{ github.run_started_at | date: 'YYYY-MM-DD-HH-mm' }}.json'  # Optional
-          schedule: '0 0 * * *'  # Optional, defaults to daily at midnight UTC
+          output-path: 'linear-statistics/issue-statistics-${{ github.run_started_at | date: 'YYYY-MM-DD-HH-mm' }}.json'
+          schedule: '0 0 * * *'
 
       - name: Commit Statistics
         if: steps.generate-stats.outputs.statistics-file
@@ -40,33 +50,6 @@ jobs:
           git add ${{ steps.generate-stats.outputs.statistics-file }}
           git diff --quiet && git diff --staged --quiet || (git commit -m "Linear issue statistics snapshot from ${{ github.run_started_at }} [skip ci]" && git push)
 ```
-
-## Development
-
-To run the script in your development environment:
-
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Set up your environment variables:
-   ```bash
-   # Copy the example environment file
-   cp .env.example .env
-   
-   # Edit .env with your Linear credentials
-   ```
-4. Run the script:
-   ```bash
-   # For development with hot reload:
-   npm run dev
-
-   # For production build:
-   npm run build && npm start
-   ```
-
-The script will generate a statistics file in the `linear-statistics` directory with the current timestamp.
 
 ## Inputs
 
@@ -115,6 +98,47 @@ The action generates a JSON file with the following structure:
 3. Add the following secrets to your repository:
    - `LINEAR_API_KEY`: Your Linear API key
    - `LINEAR_TEAM_ID`: Your team ID
+
+## Development
+
+To run the script in your development environment:
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up your environment variables:
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+   
+   # Edit .env with your Linear credentials
+   ```
+4. Run the script:
+   ```bash
+   # For development with hot reload:
+   npm run dev
+
+   # For production build:
+   npm run build && npm start
+   ```
+
+The script will generate a statistics file in the `linear-statistics` directory with the current timestamp.
+
+## Building and Publishing
+
+The action is automatically built and published when changes are pushed to the main branch:
+
+1. Build workflow (`build.yml`):
+   - Builds the TypeScript code
+   - Creates a release with the built files
+   - Triggers on push to main and pull requests
+
+2. Publish workflow (`publish.yml`):
+   - Handles marketplace publishing
+   - Triggers when a release is published
+   - Uploads the release assets
 
 ## Important Notes
 
