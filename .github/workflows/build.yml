@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,27 +43,27 @@ jobs:
           
       - name: Create Release
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            dist/index.js
-            action.yml
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
-          body: |
-            Changes in this Release:
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create a zip file containing the action files
+          zip -r action.zip dist/index.js action.yml
+          
+          # Create the release using GitHub CLI
+          gh release create "v${{ github.run_number }}" \
+            --title "Release v${{ github.run_number }}" \
+            --notes "Changes in this Release:
             ${{ github.event.head_commit.message }}
             
             ## Usage
-            ```yaml
+            \`\`\`yaml
             - uses: freko247/linear-statistics-action@v${{ github.run_number }}
               with:
-                linear-api-key: ${{ secrets.LINEAR_API_KEY }}
-                linear-team-id: ${{ secrets.LINEAR_TEAM_ID }}
+                linear-api-key: \${{ secrets.LINEAR_API_KEY }}
+                linear-team-id: \${{ secrets.LINEAR_TEAM_ID }}
                 output-path: 'linear-statistics/issue-statistics.json'
                 schedule: '0 0 * * *'
-            ```
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+            \`\`\`" \
+            --draft=false \
+            --prerelease=false \
+            action.zip 
