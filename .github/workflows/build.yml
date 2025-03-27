@@ -56,7 +56,7 @@ jobs:
               with:
                 linear-api-key: ${{ secrets.LINEAR_API_KEY }}
                 linear-team-id: ${{ secrets.LINEAR_TEAM_ID }}
-                output-path: 'linear-statistics/issue-statistics-${{ github.run_started_at | date: 'YYYY-MM-DD-HH-mm' }}.json'
+                output-path: 'linear-statistics/issue-statistics.json'
                 schedule: '0 0 * * *'
             ```
           draft: false
