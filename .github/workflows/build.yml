@@ -68,4 +68,15 @@ jobs:
             \`\`\`" \
             --draft=false \
             --prerelease=false \
-            action.zip 
+            action.zip
+
+      - name: Publish to GitHub Marketplace
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./action.zip
+          asset_name: linear-statistics-action.zip
+          asset_content_type: application/zip 
