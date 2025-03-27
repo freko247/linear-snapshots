@@ -12,4 +12,7 @@ dist/
 .idea/
 
 # Logs
-*.log 
+*.log
+
+# Generated statistics
+linear-statistics/ 

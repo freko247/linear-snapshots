@@ -1,0 +1,33 @@
+name: 'Linear Issue Statistics'
+description: 'Generate and store Linear issue statistics in your repository'
+
+inputs:
+  linear-api-key:
+    description: 'Linear API key'
+    required: true
+  linear-team-id:
+    description: 'Linear team ID to analyze'
+    required: true
+  output-path:
+    description: 'Path where to save the statistics file'
+    required: false
+    default: 'linear-statistics/issue-statistics.json'
+  schedule:
+    description: 'Cron schedule for running the action'
+    required: false
+    default: '0 0 * * *'
+
+outputs:
+  statistics-file:
+    description: 'Path to the generated statistics file'
+    value: ${{ steps.generate-statistics.outputs.statistics-file }}
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+  pre: 'dist/pre.js'
+  post: 'dist/post.js'
+
+branding:
+  icon: 'activity'
+  color: 'blue' 

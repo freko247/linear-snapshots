@@ -1,10 +1,12 @@
 import { LinearClient } from '@linear/sdk';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as dotenv from 'dotenv';
 
 // Load environment variables from .env file
 dotenv.config();
 
-console.log('Starting script...');
+console.log('Starting Linear statistics generation...');
 
 // Initialize the Linear client
 const linearClient = new LinearClient({
@@ -73,6 +75,31 @@ function displayStatusCounts(counts: { [key: string]: number }, totalIssues: num
   console.log('------------------------');
   console.log(`Total issues: ${totalIssues}`);
   console.log('------------------------');
+}
+
+// Function to generate statistics JSON
+function generateStatisticsJson(
+  counts: { [key: string]: number },
+  totalIssues: number,
+  teamName: string,
+  teamId: string,
+  organizationName: string,
+  organizationId: string,
+  timestamp: string,
+  schedule: string
+) {
+  return {
+    metadata: {
+      teamName,
+      teamId,
+      organizationName,
+      organizationId,
+      timestamp,
+      totalIssues,
+      schedule
+    },
+    statistics: counts
+  };
 }
 
 async function main() {
@@ -151,8 +178,35 @@ async function main() {
     const counts = countIssuesByStatus(allIssues);
     displayStatusCounts(counts, allIssues.length);
 
+    // Generate and save statistics JSON
+    const statistics = generateStatisticsJson(
+      counts,
+      allIssues.length,
+      team.name,
+      team.id,
+      org.name,
+      org.id,
+      new Date().toISOString(),
+      process.env.INPUT_SCHEDULE || '0 0 * * *'
+    );
+
+    // Get output path from environment
+    const outputPath = process.env.INPUT_OUTPUT_PATH || 'linear-statistics/issue-statistics.json';
+
+    // Create output directory if it doesn't exist
+    const outputDir = path.dirname(outputPath);
+    if (!fs.existsSync(outputDir)) {
+      console.log(`Creating output directory: ${outputDir}`);
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    // Save statistics to file
+    fs.writeFileSync(outputPath, JSON.stringify(statistics, null, 2));
+    console.log(`\nStatistics saved to ${outputPath}`);
+
   } catch (error) {
     console.error('Error:', error);
+    process.exit(1);
   }
 }
 
@@ -161,4 +215,5 @@ main().then(() => {
   console.log('Script completed successfully');
 }).catch(error => {
   console.error('Script failed:', error);
+  process.exit(1);
 });

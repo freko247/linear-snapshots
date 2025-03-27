@@ -1,20 +1,28 @@
 {
-  "name": "linear-snapshots",
+  "name": "linear-statistics-action",
   "version": "1.0.0",
-  "description": "A tool to interact with Linear API",
+  "description": "GitHub Action to generate and store Linear issue statistics",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "start": "npm run build && node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "linear",
+    "statistics",
+    "github-actions"
+  ],
+  "author": "",
+  "license": "GPL-3.0",
   "dependencies": {
     "@linear/sdk": "^2.0.0",
     "dotenv": "^16.4.7"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "ts-node": "^10.9.0",
-    "typescript": "^5.0.0"
+    "@types/node": "^20.11.16",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
