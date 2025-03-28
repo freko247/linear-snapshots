@@ -45,7 +45,6 @@ jobs:
           
       - name: Create Release
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        id: create_release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -70,24 +69,3 @@ jobs:
             --draft=false \
             --prerelease=false \
             action.zip
-
-      - name: Get Release Upload URL
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        id: get_upload_url
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # Get the release details and extract the upload URL
-          RELEASE_URL=$(gh release view "v${{ github.run_number }}" --json uploadUrl)
-          echo "upload_url=${RELEASE_URL}" >> $GITHUB_OUTPUT
-
-      - name: Publish to GitHub Marketplace
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_upload_url.outputs.upload_url }}
-          asset_path: ./action.zip
-          asset_name: linear-statistics-action.zip
-          asset_content_type: application/zip 
